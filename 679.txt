@@ -1,0 +1,55 @@
+#include <bits/stdc++.h>
+using namespace std;
+
+class Solution {
+public:
+    bool judgePoint24(vector<int>& cards) {
+        vector<double> nums(cards.begin(), cards.end());
+        return dfs(nums);
+    }
+
+private:
+    static constexpr double EPS = 1e-6;
+
+    bool dfs(vector<double> a) {
+        if (a.size() == 1) return fabs(a[0] - 24.0) < EPS;
+
+        int n = (int)a.size();
+        // pilih 2 angka i<j
+        for (int i = 0; i < n; ++i) {
+            for (int j = i + 1; j < n; ++j) {
+                vector<double> rest;
+                rest.reserve(n - 1);
+                for (int k = 0; k < n; ++k)
+                    if (k != i && k != j) rest.push_back(a[k]);
+
+                double x = a[i], y = a[j];
+                // Kumpulan kandidat hasil (maks 6)
+                vector<double> cand;
+                cand.push_back(x + y);      // komutatif
+                cand.push_back(x * y);      // komutatif
+                cand.push_back(x - y);      // non-komutatif
+                cand.push_back(y - x);      // non-komutatif
+                if (fabs(y) > EPS) cand.push_back(x / y);
+                if (fabs(x) > EPS) cand.push_back(y / x);
+
+                for (double v : cand) {
+                    rest.push_back(v);
+                    if (dfs(rest)) return true;
+                    rest.pop_back();
+                }
+            }
+        }
+        return false;
+    }
+};
+
+// ---- Contoh uji lokal ----
+int main() {
+    Solution s;
+    vector<int> a1 = {4,1,8,7};
+    vector<int> a2 = {1,2,1,2};
+    cout << boolalpha << s.judgePoint24(a1) << "\n"; // true
+    cout << boolalpha << s.judgePoint24(a2) << "\n"; // false
+    return 0;
+}
